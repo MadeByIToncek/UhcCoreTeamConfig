@@ -112,14 +112,14 @@ public class AutoAssigner implements Listener, AutoCloseable {
                         }
                     } else {
                         event.getPlayer().sendTitle(ChatColor.DARK_RED + "You are not whitelisted!",
-                                ChatColor.DARK_RED + "Message admins your nick \"" + ChatColor.WHITE + event.getPlayer().getName() + ChatColor.DARK_RED + "\"!",
+                                ChatColor.DARK_RED + "Message admins your nick \"" + ChatColor.WHITE + event.getPlayer().getName() + ChatColor.DARK_RED + "\" on discord!",
                                 20,
                                 200,
                                 20);
                         new BukkitRunnable() {
                             @Override
                             public void run() {
-                                event.getPlayer().kick(Component.text(ChatColor.RED + "You are not whitelisted!    Message @itoncek your nick \"" + ChatColor.WHITE + event.getPlayer().getName() + ChatColor.RED + "\" on discord!"));
+                                event.getPlayer().kick(Component.text(ChatColor.RED + "You are not whitelisted!\nMessage admins your nick \"" + ChatColor.WHITE + event.getPlayer().getName() + ChatColor.RED + "\" on discord!"));
                             }
                         }.runTaskLater(pl, 2L);
                     }
