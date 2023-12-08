@@ -329,6 +329,7 @@ public class DiscordBotController {
                 js.add(GREEN + "Bot #%d : ".formatted(i) + WHITE + bot.getSelfUser().getName() + statusify(bot.getPresence().getStatus()));
                 i++;
             }
+            js.add("");
             js.add(WHITE + "______________________________");
             return js.toString();
         } else return DARK_RED + "NOT INITIALIZED!";

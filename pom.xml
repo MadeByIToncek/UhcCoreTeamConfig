@@ -5,7 +5,7 @@
 
     <groupId>space.itoncek</groupId>
     <artifactId>uctc</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>23w49b</version>
     <packaging>jar</packaging>
 
     <name>UhcCoreTeamConfig</name>
