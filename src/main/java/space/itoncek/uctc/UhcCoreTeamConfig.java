@@ -18,16 +18,17 @@ public final class UhcCoreTeamConfig extends JavaPlugin {
     public static GameManager gmmgr = null;
     public static UhcCoreTeamConfig pl;
     public static DiscordBotController dbc;
-    public AutoAssigner assigner = new AutoAssigner(CFGMGR.getConfig(getDataFolder()).getString("dburl"));
+    public AutoAssigner assigner;
 
     @Override
     public void onEnable() {
         // Plugin startup logic
         pl = this;
+        getServer().getPluginManager().registerEvents(new InstanceObtainer(), this);
         dbc = new DiscordBotController(CFGMGR.getConfig(getDataFolder()));
+        assigner = new AutoAssigner(CFGMGR.getConfig(getDataFolder()).getString("dburl"));
         getCommand("discord").setExecutor(new DiscordCommand());
         getCommand("discord").setTabCompleter(new DiscordCommand());
-        getServer().getPluginManager().registerEvents(new InstanceObtainer(), this);
         getServer().getPluginManager().registerEvents(assigner, this);
     }
 

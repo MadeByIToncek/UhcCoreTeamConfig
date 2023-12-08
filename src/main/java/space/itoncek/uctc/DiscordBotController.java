@@ -6,9 +6,9 @@
 
 package space.itoncek.uctc;
 
-import space.itoncek.uctc.meta.AlreadyRunningException;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.bukkit.Bukkit;
 import org.json.JSONObject;
+import space.itoncek.uctc.meta.AlreadyRunningException;
 
 import java.security.SecureRandom;
 import java.sql.*;
@@ -26,8 +27,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
-import static org.bukkit.ChatColor.GREEN;
-import static org.bukkit.ChatColor.WHITE;
+import static org.bukkit.ChatColor.*;
 
 public class DiscordBotController {
     private final long categorySnowFlake;
@@ -172,21 +172,24 @@ public class DiscordBotController {
         List<MoveAction> todo = new ArrayList<>();
 
         Guild g = bot.getGuildById(serverSnowFlake);
-        while (rs.next()) {
-            long userID = rs.getLong("Snowflake");
-            if (rs.getLong("team") == -1) continue;
+        try (PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM DiscordChannelStorage WHERE team = ?;")) {
+            while (rs.next()) {
+                long userID = rs.getLong("Snowflake");
+                if (rs.getLong("team") == -1) continue;
 
-            if (!g.getMemberById(userID).getVoiceState().inAudioChannel()) {
-                errorStream.accept("Player " + rs.getString("name") + " is not in voice channel, ignoring;");
-                continue;
-            }
+                if (!g.getMemberById(userID).getVoiceState().inAudioChannel()) {
+                    errorStream.accept("Player " + rs.getString("name") + " is not in voice channel, ignoring;");
+                    continue;
+                }
 
-            if (g.getMemberById(userID).getVoiceState().getChannel().asStageChannel().getIdLong() == mainVoice) {
-                System.out.println("Moving " + rs.getString("name") + " to appropriate channel");
-                ResultSet set = stmt.executeQuery("SELECT * FROM DiscordChannelStorage WHERE team = %d;");
-                set.next();
-                long vcid = set.getLong("channelSnowflake");
-                todo.add(new MoveAction(userID, vcid));
+                if (g.getMemberById(userID).getVoiceState().getChannel().asStageChannel().getIdLong() == mainVoice) {
+                    System.out.println("Moving " + rs.getString("name") + " to appropriate channel");
+                    pstmt.setInt(1,rs.getInt("team"));
+                    ResultSet set = pstmt.executeQuery();
+                    set.next();
+                    long vcid = set.getLong("channelSnowflake");
+                    todo.add(new MoveAction(userID, vcid));
+                }
             }
         }
 
@@ -220,15 +223,19 @@ public class DiscordBotController {
 
             ResultSet rs = stmt.executeQuery("SELECT * FROM DiscordChannelStorage;");
 
-            List<String> batchUpdate = new ArrayList<>();
             List<Long> deleteChannels = new ArrayList<>();
             List<Long> deleteRoles = new ArrayList<>();
 
-            while (rs.next()) {
-                deleteChannels.add(rs.getLong("channelSnowflake"));
-                deleteRoles.add(rs.getLong("roleSnowflake"));
-                batchUpdate.add("DELETE FROM `s4_csytopen`.`DiscordChannelStorage` WHERE  `team`=%d;".formatted(rs.getInt("team")));
+            try (PreparedStatement pstmt = conn.prepareStatement("DELETE FROM `s4_csytopen`.`DiscordChannelStorage` WHERE  `team`=?;")) {
+                while (rs.next()) {
+                    deleteChannels.add(rs.getLong("channelSnowflake"));
+                    deleteRoles.add(rs.getLong("roleSnowflake"));
+                    pstmt.setInt(1,rs.getInt("team"));
+                    pstmt.executeUpdate();
+                }
             }
+
+            stmt.close();
             var ref = new Object() {
                 CountDownLatch latch = new CountDownLatch(deleteChannels.size());
             };
@@ -253,9 +260,6 @@ public class DiscordBotController {
                 t.start();
             }
             ref.latch.await();
-
-            for (String sql : batchUpdate) stmt.executeUpdate(sql);
-            stmt.close();
         }
     }
 
@@ -314,16 +318,35 @@ public class DiscordBotController {
 
     public String getBotStatus() {
         if (initialized) {
+
+            List<JDA> superbots = new ArrayList<>(jda);
+            superbots.add(bot);
+
             StringJoiner js = new StringJoiner("\n");
             js.add(WHITE + "______________________________");
             int i = 0;
-            for (JDA bot : jda) {
-                js.add(GREEN + "Bot %d name: ".formatted(i) + WHITE + bot.getSelfUser().getName());
+            for (JDA bot : superbots) {
+                js.add(GREEN + "Bot #%d : ".formatted(i) + WHITE + bot.getSelfUser().getName() + statusify(bot.getPresence().getStatus()));
                 i++;
             }
             js.add(WHITE + "______________________________");
             return js.toString();
-        } else return "";
+        } else return DARK_RED + "NOT INITIALIZED!";
+    }
+
+    private String statusify(OnlineStatus activity) {
+        StringJoiner js = new StringJoiner("");
+        js.add(WHITE + "(");
+        js.add(switch (activity) {
+            case ONLINE -> GREEN;
+            case IDLE -> GOLD;
+            case DO_NOT_DISTURB -> RED;
+            case INVISIBLE -> DARK_GRAY;
+            case OFFLINE -> BLACK;
+            case UNKNOWN -> BLUE;
+        } + activity.name());
+        js.add(")");
+        return js.toString();
     }
 
 

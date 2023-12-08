@@ -25,6 +25,9 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.logging.Level;
 
+import static space.itoncek.uctc.UhcCoreTeamConfig.gmmgr;
+import static space.itoncek.uctc.UhcCoreTeamConfig.pl;
+
 
 public class AutoAssigner implements Listener, AutoCloseable {
     private final Connection conn;
@@ -32,10 +35,45 @@ public class AutoAssigner implements Listener, AutoCloseable {
     public AutoAssigner(String url) {
         try {
             conn = DriverManager.getConnection(url);
+            createTables(conn);
         } catch (SQLException e) {
             handle(e);
-            throw new RuntimeException("AutoAssignerError");
+            throw new RuntimeException(e);
         }
+    }
+
+    /*
+    CREATE TABLE IF NOT EXISTS `DiscordChannelStorage` (
+            `team` int(11) NOT NULL,
+            `channelSnowflake` bigint(20) unsigned NOT NULL,
+            `roleSnowflake` bigint(20) unsigned NOT NULL,
+        PRIMARY KEY (`team`)
+    );
+
+    CREATE TABLE IF NOT EXISTS `Players` (
+            `name` varchar(32) NOT NULL,
+            `team` int(10) NOT NULL DEFAULT 0,
+            `snowflake` bigint(20) NOT NULL,
+        PRIMARY KEY (`name`)
+    );
+
+     */
+    private void createTables(Connection conn) throws SQLException {
+        Statement stmt = conn.createStatement();
+        stmt.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS `Players` (
+                        `name` varchar(32) NOT NULL,
+                        `team` int(10) NOT NULL DEFAULT 0,
+                        `snowflake` bigint(20) NOT NULL,
+                    PRIMARY KEY (`name`)
+                );""");
+        stmt.executeUpdate("""
+                CREATE TABLE IF NOT EXISTS `DiscordChannelStorage` (
+                        `team` int(11) NOT NULL,
+                        `channelSnowflake` bigint(20) unsigned NOT NULL,
+                        `roleSnowflake` bigint(20) unsigned NOT NULL,
+                    PRIMARY KEY (`team`)
+                );""");
     }
 
     private void handle(Exception e) {
@@ -52,22 +90,22 @@ public class AutoAssigner implements Listener, AutoCloseable {
                     ResultSet rs = stmt.executeQuery("SELECT * FROM Players WHERE name = '%s'".formatted(event.getPlayer().getName()));
 
                     if (rs.next()) {
-                        UhcPlayer p = UhcCoreTeamConfig.gmmgr.getPlayerManager().getUhcPlayer(event.getPlayer().getName());
+                        UhcPlayer p = gmmgr.getPlayerManager().getUhcPlayer(event.getPlayer().getName());
                         int teamID = rs.getInt("team");
                         if (teamID > 0) {
                             Statement stmt2 = conn.createStatement();
                             ResultSet fellows = stmt2.executeQuery("SELECT * FROM Players WHERE team = '%d'".formatted(rs.getInt("team")));
                             while (fellows.next()) {
-                                if (!Objects.equals(fellows.getString("name"), p.getName()) && UhcCoreTeamConfig.gmmgr.getPlayerManager().getUhcPlayer(fellows.getString("name")).isOnline()) {
-                                    UhcTeam team = UhcCoreTeamConfig.gmmgr.getPlayerManager().getUhcPlayer(fellows.getString("name")).getTeam();
+                                if (!Objects.equals(fellows.getString("name"), p.getName()) && gmmgr.getPlayerManager().getUhcPlayer(fellows.getString("name")).isOnline()) {
+                                    UhcTeam team = gmmgr.getPlayerManager().getUhcPlayer(fellows.getString("name")).getTeam();
                                     team.join(p);
                                     team.setTeamId(teamID);
                                 }
                             }
                             fellows.close();
                             stmt2.close();
-                            for (UhcPlayer uhcPlayer : UhcCoreTeamConfig.gmmgr.getPlayerManager().getPlayersList()) {
-                                UhcCoreTeamConfig.gmmgr.getScoreboardManager().updatePlayerOnTab(uhcPlayer);
+                            for (UhcPlayer uhcPlayer : gmmgr.getPlayerManager().getPlayersList()) {
+                                gmmgr.getScoreboardManager().updatePlayerOnTab(uhcPlayer);
                             }
                         } else {
                             setPlayerSpectating(event.getPlayer(), p);
@@ -83,7 +121,7 @@ public class AutoAssigner implements Listener, AutoCloseable {
                             public void run() {
                                 event.getPlayer().kick(Component.text(ChatColor.RED + "You are not whitelisted!    Message @itoncek your nick \"" + ChatColor.WHITE + event.getPlayer().getName() + ChatColor.RED + "\" on discord!"));
                             }
-                        }.runTaskLater(UhcCoreTeamConfig.pl, 2L);
+                        }.runTaskLater(pl, 2L);
                     }
                     rs.close();
                     stmt.close();
@@ -91,7 +129,7 @@ public class AutoAssigner implements Listener, AutoCloseable {
                     Bukkit.getLogger().log(Level.SEVERE, e.getMessage(), e);
                 }
             }
-        }.runTaskLater(UhcCoreTeamConfig.pl, new Random().nextLong(1,20));
+        }.runTaskLater(pl, new Random().nextLong(1,20));
     }
 
     @Override
@@ -109,8 +147,9 @@ public class AutoAssigner implements Listener, AutoCloseable {
             try {
                 UhcTeam oldTeam = uhcPlayer.getTeam();
                 oldTeam.leave(uhcPlayer);
-                UhcCoreTeamConfig.gmmgr.getScoreboardManager().updatePlayerOnTab(uhcPlayer);
-                UhcCoreTeamConfig.gmmgr.getScoreboardManager().updateTeamOnTab(oldTeam);
+                oldTeam.setTeamId(new Random().nextInt(99,9999));
+                gmmgr.getScoreboardManager().updatePlayerOnTab(uhcPlayer);
+                gmmgr.getScoreboardManager().updateTeamOnTab(oldTeam);
             } catch (UhcTeamException e) {
                 Bukkit.getLogger().log(Level.SEVERE, e.getMessage(), e);
             }

@@ -2,3 +2,10 @@ name: UhcCoreTeamConfig
 version: '${project.version}'
 main: space.itoncek.uctc.UhcCoreTeamConfig
 api-version: '1.19'
+commands:
+  discord:
+    permission: minecraft.op
+    aliases:
+      - dsc
+      - dbc
+    permission-message: Nope!
