@@ -27,7 +27,7 @@ public final class UhcCoreTeamConfig extends JavaPlugin {
         // Plugin startup logic
         pl = this;
         getServer().getPluginManager().registerEvents(new InstanceObtainer(), this);
-        dbc = new DiscordBotController(CFGMGR.getConfig(getDataFolder()).getJSONObject("discord"));
+        dbc = new DiscordBotController(CFGMGR.getConfig(getDataFolder()));
         assigner = new AutoAssigner(CFGMGR.getConfig(getDataFolder()).getJSONObject("jdbc").getString("dburl"));
         getCommand("discord").setExecutor(new DiscordCommand());
         getCommand("discord").setTabCompleter(new DiscordCommand());

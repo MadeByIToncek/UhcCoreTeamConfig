@@ -45,7 +45,7 @@ public class DiscordBotController {
     public DiscordBotController(JSONObject dbcConf) {
         token = new ArrayList<>();
         boolean first = true;
-        for (Object dbcToken : dbcConf.getJSONArray("dbcToken")) {
+        for (Object dbcToken : dbcConf.getJSONObject("discord").getJSONArray("dbcToken")) {
             String token = (String) dbcToken;
             if (first) {
                 first = false;
@@ -54,10 +54,10 @@ public class DiscordBotController {
                 this.token.add(token);
             }
         }
-        this.serverSnowFlake = dbcConf.getLong("dbcGuildID");
-        this.categorySnowFlake = dbcConf.getLong("dbcCategoryID");
-        this.mainVoice = dbcConf.getLong("mainVoice");
-        this.jdbc = dbcConf.getString("dburl");
+        this.serverSnowFlake = dbcConf.getJSONObject("discord").getLong("dbcGuildID");
+        this.categorySnowFlake = dbcConf.getJSONObject("discord").getLong("dbcCategoryID");
+        this.mainVoice = dbcConf.getJSONObject("discord").getLong("mainVoice");
+        this.jdbc = dbcConf.getJSONObject("jdbc").getString("dburl");
         jda = new ArrayList<>();
     }
 
