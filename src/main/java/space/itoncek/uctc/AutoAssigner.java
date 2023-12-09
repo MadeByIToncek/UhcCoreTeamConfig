@@ -1,8 +1,8 @@
-/*
- * Made by IToncek
- *
- * Copyright (c) 2023.
- */
+/*######################
+ # Copyright (c) 2023. #
+ #                     #
+ # Made by IToncek     #
+ ######################*/
 
 package space.itoncek.uctc;
 
@@ -128,7 +128,7 @@ public class AutoAssigner implements Listener, AutoCloseable {
                     Bukkit.getLogger().log(Level.SEVERE, e.getMessage(), e);
                 }
             }
-        }.runTaskLater(pl, new Random().nextLong(1,20));
+        }.runTaskLater(pl, new Random().nextLong(1, 20));
     }
 
     @Override
@@ -146,7 +146,7 @@ public class AutoAssigner implements Listener, AutoCloseable {
             try {
                 UhcTeam oldTeam = uhcPlayer.getTeam();
                 oldTeam.leave(uhcPlayer);
-                oldTeam.setTeamId(new Random().nextInt(99,9999));
+                oldTeam.setTeamId(new Random().nextInt(99, 9999));
                 gmmgr.getScoreboardManager().updatePlayerOnTab(uhcPlayer);
                 gmmgr.getScoreboardManager().updateTeamOnTab(oldTeam);
             } catch (UhcTeamException e) {

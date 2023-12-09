@@ -1,3 +1,9 @@
+/*######################
+ # Copyright (c) 2023. #
+ #                     #
+ # Made by IToncek     #
+ ######################*/
+
 package space.itoncek.uctc.cfg;
 
 import static net.kyori.adventure.text.format.NamedTextColor.*;

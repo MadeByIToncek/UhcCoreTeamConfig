@@ -1,8 +1,8 @@
-/*
- * Made by IToncek
- *
- * Copyright (c) 2023.
- */
+/*######################
+ # Copyright (c) 2023. #
+ #                     #
+ # Made by IToncek     #
+ ######################*/
 
 package space.itoncek.uctc;
 
@@ -35,11 +35,11 @@ public class DiscordBotController {
     private final long serverSnowFlake;
     private final String jdbc;
     private final List<JDA> jda;
+    private final long mainVoice;
     private JDA bot;
     private String bottoken;
     private Connection conn;
     private boolean initialized = false;
-    private final long mainVoice;
 
 
     public DiscordBotController(JSONObject dbcConf) {
@@ -184,7 +184,7 @@ public class DiscordBotController {
 
                 if (g.getMemberById(userID).getVoiceState().getChannel().asStageChannel().getIdLong() == mainVoice) {
                     System.out.println("Moving " + rs.getString("name") + " to appropriate channel");
-                    pstmt.setInt(1,rs.getInt("team"));
+                    pstmt.setInt(1, rs.getInt("team"));
                     ResultSet set = pstmt.executeQuery();
                     set.next();
                     long vcid = set.getLong("channelSnowflake");
@@ -230,7 +230,7 @@ public class DiscordBotController {
                 while (rs.next()) {
                     deleteChannels.add(rs.getLong("channelSnowflake"));
                     deleteRoles.add(rs.getLong("roleSnowflake"));
-                    pstmt.setInt(1,rs.getInt("team"));
+                    pstmt.setInt(1, rs.getInt("team"));
                     pstmt.executeUpdate();
                 }
             }

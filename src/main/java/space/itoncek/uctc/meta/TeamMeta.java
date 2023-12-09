@@ -1,8 +1,8 @@
-/*
- * Made by IToncek
- *
- * Copyright (c) 2023.
- */
+/*######################
+ # Copyright (c) 2023. #
+ #                     #
+ # Made by IToncek     #
+ ######################*/
 
 package space.itoncek.uctc.meta;
 
