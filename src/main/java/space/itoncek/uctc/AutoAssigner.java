@@ -13,20 +13,19 @@ import com.gmail.val59000mc.players.UhcPlayer;
 import com.gmail.val59000mc.players.UhcTeam;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitRunnable;
+import space.itoncek.uctc.cfg.Translation;
 
 import java.sql.*;
 import java.util.Objects;
 import java.util.Random;
 import java.util.logging.Level;
 
-import static space.itoncek.uctc.UhcCoreTeamConfig.gmmgr;
-import static space.itoncek.uctc.UhcCoreTeamConfig.pl;
+import static space.itoncek.uctc.UhcCoreTeamConfig.*;
 
 
 public class AutoAssigner implements Listener, AutoCloseable {
@@ -111,15 +110,15 @@ public class AutoAssigner implements Listener, AutoCloseable {
                             setPlayerSpectating(event.getPlayer(), p);
                         }
                     } else {
-                        event.getPlayer().sendTitle(ChatColor.DARK_RED + "You are not whitelisted!",
-                                ChatColor.DARK_RED + "Message admins your nick \"" + ChatColor.WHITE + event.getPlayer().getName() + ChatColor.DARK_RED + "\" on discord!",
+                        event.getPlayer().sendTitle(lng.getTranslation(Translation.NOT_WHITELISTED_TITLE),
+                                lng.getTranslation(Translation.NOT_WHITELISTED_SUBTITLE).formatted(event.getPlayer().getName()),
                                 20,
                                 200,
                                 20);
                         new BukkitRunnable() {
                             @Override
                             public void run() {
-                                event.getPlayer().kick(Component.text(ChatColor.RED + "You are not whitelisted!\nMessage admins your nick \"" + ChatColor.WHITE + event.getPlayer().getName() + ChatColor.RED + "\" on discord!"));
+                                event.getPlayer().kick(Component.text(lng.getTranslation(Translation.NOT_WHITELISTED_KICK_MESSAGE)));
                             }
                         }.runTaskLater(pl, 2L);
                     }

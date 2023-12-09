@@ -7,9 +7,10 @@
 package space.itoncek.uctc;
 
 import com.gmail.val59000mc.game.GameManager;
-import space.itoncek.uctc.cfg.CFGMGR;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import space.itoncek.uctc.cfg.CFGMGR;
+import space.itoncek.uctc.cfg.Lang;
 
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -18,6 +19,7 @@ public final class UhcCoreTeamConfig extends JavaPlugin {
     public static GameManager gmmgr = null;
     public static UhcCoreTeamConfig pl;
     public static DiscordBotController dbc;
+    public static Lang lng;
     public AutoAssigner assigner;
 
     @Override

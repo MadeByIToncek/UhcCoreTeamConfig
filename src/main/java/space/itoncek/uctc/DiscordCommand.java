@@ -15,10 +15,14 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import space.itoncek.uctc.cfg.Translation;
+import space.itoncek.uctc.meta.AlreadyRunningException;
 
 import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
+
+import static space.itoncek.uctc.UhcCoreTeamConfig.lng;
 
 
 public class DiscordCommand implements CommandExecutor, TabCompleter {
@@ -36,15 +40,15 @@ public class DiscordCommand implements CommandExecutor, TabCompleter {
                             UhcCoreTeamConfig.dbc.connect();
                         } catch (InterruptedException e) {
                             Bukkit.getLogger().log(Level.SEVERE, e.getMessage());
-                            sender.sendMessage(ChatColor.DARK_RED + "JDA unable to connect");
+                            sender.sendMessage(lng.getTranslation(Translation.JDA_UNABLE_TO_CONNECT));
                         } catch (SQLException e) {
                             Bukkit.getLogger().log(Level.SEVERE, e.getMessage());
-                            sender.sendMessage(ChatColor.DARK_RED + "MySQL unable to connect");
-                        } catch (Exception e) {
+                            sender.sendMessage(lng.getTranslation(Translation.MYSQL_UNABLE_TO_CONNECT));
+                        } catch (AlreadyRunningException e) {
                             Bukkit.getLogger().log(Level.INFO, e.getMessage());
-                            sender.sendMessage(ChatColor.DARK_RED + "Bot Already running");
+                            sender.sendMessage(lng.getTranslation(Translation.DBC_ALREADY_RUNNING));
                         } finally {
-                            sender.sendMessage(ChatColor.GREEN + "DBC Started Succesfully");
+                            sender.sendMessage(lng.getTranslation(Translation.DBC_START_SUCCESS));
                             sender.sendMessage(" ");
                             sender.sendMessage(UhcCoreTeamConfig.dbc.getBotStatus());
                             sender.sendMessage(" ");
@@ -60,11 +64,11 @@ public class DiscordCommand implements CommandExecutor, TabCompleter {
                             UhcCoreTeamConfig.dbc.close();
                         } catch (SQLException e) {
                             Bukkit.getLogger().log(Level.SEVERE, e.getMessage());
-                            sender.sendMessage(ChatColor.DARK_RED + "MySQL DB Access Error!");
+                            sender.sendMessage(lng.getTranslation(Translation.MYSQL_ACCESSS_ERROR));
                         } catch (InterruptedException e) {
-                            sender.sendMessage(ChatColor.DARK_RED + "JDA shutdown interrupted!");
+                            sender.sendMessage(lng.getTranslation(Translation.JDA_SHUTDOWN_INTERRUPTED));
                         } finally {
-                            sender.sendMessage(ChatColor.GREEN + "DBC Closed Succesfully");
+                            sender.sendMessage(lng.getTranslation(Translation.DBC_STOP_SUCCESS));
                         }
                     }
                 }.runTaskAsynchronously(UhcCoreTeamConfig.pl);
@@ -76,11 +80,11 @@ public class DiscordCommand implements CommandExecutor, TabCompleter {
                         try {
                             UhcCoreTeamConfig.dbc.createChannels();
                         } catch (SQLException e) {
-                            sender.sendMessage(ChatColor.DARK_RED + "MySQL DB Access Error!");
+                            sender.sendMessage(lng.getTranslation(Translation.MYSQL_ACCESSS_ERROR));
                         } catch (InterruptedException e) {
-                            sender.sendMessage(ChatColor.DARK_RED + "JDA processing interrupted!");
+                            sender.sendMessage(lng.getTranslation(Translation.JDA_PROCESSING_INTERRUPTED));
                         } finally {
-                            sender.sendMessage(ChatColor.GREEN + "Channels Created Succesfully");
+                            sender.sendMessage(lng.getTranslation(Translation.DBC_CHANNEL_CREATED_SUCCESS));
                         }
                     }
                 }.runTaskAsynchronously(UhcCoreTeamConfig.pl);
